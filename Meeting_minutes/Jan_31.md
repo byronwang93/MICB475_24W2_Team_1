@@ -1,0 +1,11 @@
+# Agenda
+
+### Meeting notes
+
+- intros
+- talked about intro papers
+  - interested in depression paper, alcohol paper + ISS paper
+  - can consider machine learning research Qs to create predictive models
+- for next week's checkin
+  - create github repository
+  - come with list of research Qs
