@@ -12,8 +12,8 @@
 - How does microbial diversity + composition on the ISS compare to other confined environments such as simulated space habitats (HI-SEAS)? + college dormitories? -> ISS
 
 Prevalence:
-WHY? -> smoking is very prevalent in our society
-Could be a new avenue in preventative medicine 
+- WHY? -> smoking is very prevalent in our society
+- Could be a new avenue in preventative medicine 
 
 ### Meeting notes
 - 
