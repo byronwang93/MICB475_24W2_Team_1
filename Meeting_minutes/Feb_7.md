@@ -1,5 +1,5 @@
 # Agenda
-## Interested papers
+## Interested datasets
 - alcohol dependency
 - multiple sclerosis
 - vaping dataset
