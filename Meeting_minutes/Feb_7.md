@@ -60,8 +60,8 @@ Prevalence:
   - 
 
 ### TODOS - 1 more meeting (proposal due on 23rd)
-[] find specific research Q w/ this dataset - make sure we really understand the experimental procedures + thinking about what we'd like to explore (3-4 aims) (ex. diversity analysis)
-[] read through proposal assignment on canvas
-[] be on lookout for team server
-[] online meeting next week
-[] archive all files on github (server isn't the most stable) - qza files
+- [] find specific research Q w/ this dataset - make sure we really understand the experimental procedures + thinking about what we'd like to explore (3-4 aims) (ex. diversity analysis)
+- [] read through proposal assignment on canvas
+- [] be on lookout for team server
+- [] online meeting next week
+- [] archive all files on github (server isn't the most stable) - qza files
