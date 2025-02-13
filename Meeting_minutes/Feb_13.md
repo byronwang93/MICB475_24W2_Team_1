@@ -36,4 +36,4 @@ Does sex influence the microbial composition of foot ulcers? (exclude the ones i
 
 ### Todos
 
-[] tbd
+- [ ] tbd
