@@ -40,4 +40,32 @@ qiime demux summarize \
 ```
 6. denoising and clustering step - `table.qza` `rep-seqs.qza` `denoising-stats.qza`
    - taking over an hour to run (decided to run in separate screen)
+```
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs ulcers-demux.qza \
+  --p-trim-left-f 0 \
+  --p-trunc-len-f 205 \
+  --p-trim-left-r 0 \
+  --p-trunc-len-r 205 \
+  --o-table table.qza \
+  --o-representative-sequences rep-seqs.qza \
+  --o-denoising-stats denoising-stats.qza
+```
 7. visualizing ASV stats - `stats.qzv` `table.qzv` `rep-seqs.qzv`
+```
+# Visualize DADA2 stats
+qiime metadata tabulate \
+  --m-input-file denoising-stats.qza \
+  --o-visualization denoising-stats.qzv
+
+# Visualize ASVs stats
+qiime feature-table summarize \
+  --i-table table.qza \
+  --o-visualization table.qzv \
+  --m-sample-metadata-file /mnt/datasets/project_2/nasa/ulcers_metadata.tsv
+  
+qiime feature-table tabulate-seqs \
+  --i-data rep-seqs.qza \
+  --o-visualization rep-seqs.qzv
+```
+8. 
