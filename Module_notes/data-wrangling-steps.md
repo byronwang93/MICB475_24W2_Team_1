@@ -7,12 +7,6 @@
 
 1. created `ulcers` directory in `/data`
 2. generating the `ulcers-demux.qza` file
-```
-   qiime tools import \
-  --type EMPSingleEndSequences \
-  --input-path /mnt/datasets/project_1/moving_pictures/emp-single-end-sequences \
-  --output-path emp-single-end-sequences.qza
-```
    - a few problems w/ our data
       - manifest file had columns for **paired-end** data but QIIME 2 initially expected a **single-end** manifest format
          - :. we switched to using V2 manifest format (`PairedEndFastqManifestPhred33V2`)
