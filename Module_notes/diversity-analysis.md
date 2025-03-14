@@ -58,6 +58,9 @@ library(phyloseq)
 library(ape) # importing trees
 library(tidyverse)
 library(vegan)
+library(picante)
+library(ggplot2)
+
 
 #### Load data ####
 # Change file paths as necessary
@@ -127,4 +130,93 @@ sample_data(ulcers_phylo_final)
 
 #### saving data after filtering
 save(ulcers_phylo_final, file="ulcers_phylo_final.RData")
+```
+
+### Generate Alpha Diversity Metrics and Plots
+```
+#### rarefaction
+
+rarefaction_curve <- rarecurve(t(as.data.frame(otu_table(ulcers_phylo_final))), cex=0.1) # gives us a rarefaction curve 
+
+ulcers_rare <- rarefy_even_depth(ulcers_phylo_final, rngseed = 1, sample.size = 4008) # sampling depth was decided during data wrangling by Byron
+
+#### save rarefaction data
+save(ulcers_rare, file="ulcers_rare.RData")
+
+#### Alpha diversity - Shannon and Simpson #####
+plot_richness(ulcers_rare) 
+
+# only want to look at Shannon and Simpson 
+plot_richness(ulcers_rare, measures = c("Shannon", "Simpson")) 
+
+# make it into a box plot
+gg_richness <- plot_richness(ulcers_rare, x = "Spaceflight", measures = c("Shannon","Simpson")) +
+  xlab("Spaceflight") +
+  geom_boxplot()
+gg_richness
+
+# save image
+ggsave(filename = "shannon_simpson.png"
+       , gg_richness
+       , height=4, width=6)
+
+# calculate Faith's phylogenetic diversity as PD
+# measures phylogenetic distance 
+phylo_dist <- pd(t(otu_table(ulcers_rare)), phy_tree(ulcers_rare),
+                 include.root=F) 
+
+# add PD to metadata table
+sample_data(ulcers_rare)$PD <- phylo_dist$PD
+
+# plot any metadata category against the PD
+plot.pd <- ggplot(sample_data(ulcers_rare), aes(Spaceflight, PD)) + 
+  geom_boxplot() +
+  xlab("Spaceflight") +
+  ylab("Faith's PD")
+
+# view plot
+plot.pd
+
+# save plot
+ggsave(filename = "faith's_pd.png"
+       , plot.pd
+       , height=4, width=6)
+```
+
+### Generating Beta Diversity Metrics
+```
+### bray-curtis
+
+bc_dm <- distance(ulcers_rare, method="bray")
+
+# generate coordinate system 
+pcoa_bc <- ordinate(ulcers_rare, method="PCoA", distance=bc_dm)
+
+# take our rarefied phyloseq objects and combine our coordinates that we just generated 
+# for different points, the body size will be identified based on colour 
+# for different points, the subject will be identified based on shape 
+plot_ordination(ulcers_rare, pcoa_bc, color = "Spaceflight")
+
+gg_pcoa_bc <- plot_ordination(ulcers_rare, pcoa_bc, color = "Spaceflight") + # saving it under a variable
+  labs(col = "Spaceflight") # rename legend names;col = colour channel
+gg_pcoa_bc
+
+ggsave("bray_curtis_pcoa.png"
+       , gg_pcoa_bc
+       , height=4, width=5)
+
+### weighted unifrac
+wuf_dm <- distance(ulcers_rare, method = "unifrac", weighted = TRUE)
+
+pcoa_wuf <- ordinate(ulcers_rare, method="PCoA", distance=wuf_dm)
+
+plot_ordination(ulcers_rare, pcoa_wuf, color = "Spaceflight")
+
+gg_pcoa_wuf <- plot_ordination(ulcers_rare, pcoa_wuf, color = "Spaceflight") + # saving it under a variable
+  labs(col = "Spaceflight") # rename legend names;col = colour channel
+gg_pcoa_wuf
+
+ggsave("weightedunifrac_pcoa.png"
+       , gg_pcoa_wuf
+       , height=4, width=5)
 ```
