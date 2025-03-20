@@ -1,0 +1,43 @@
+sample-id	Source	Organism	subject	sex	age	Material_Type	Spaceflight	sample_condition	protocol_ref	sample_type	duraction	growth_temperature	preservation_method	storage_temperature
+lane1TineA1	Patient 2	Microbiota	Patient 2	female	84 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA2	Patient 3	Microbiota	Patient 3	male	62 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA3	Patient 4	Microbiota	Patient 4	male	67 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA4	Patient 5	Microbiota	Patient 5	female	64 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA5	Patient 6	Microbiota	Patient 6	female	81 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA6	Patient 7	Microbiota	Patient 7	female	84 year	Biofilms	Not Applicable	Diabetic foot ulcers	sample collection	Biofilm	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA7	Patient 8	Microbiota	Patient 8	male	61 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA8	Patient 9	Microbiota	Patient 9	female	57 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA9	Patient 10	Microbiota	Patient 10	male	74 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA10	Patient 11	Microbiota	Patient 11	female	83 year	Biofilms	Not Applicable	Diabetic foot ulcers	sample collection	Biofilm	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA11	Patient 12	Microbiota	Patient 12	male	52 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineA12	Patient 13	Microbiota	Patient 13	male	75 year	Biofilms	Not Applicable	Diabetic foot ulcers	sample collection	Biofilm	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB1	Patient 14	Microbiota	Patient 14	female	63 year	Biofilms	Not Applicable	Diabetic foot ulcers	sample collection	Biofilm	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB2	Patient 15	Microbiota	Patient 15	male	65 year	Biofilms	Not Applicable	Diabetic foot ulcers	sample collection	Biofilm	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB3	Patient 16	Microbiota	Patient 16	male	74 year	Skin Tissue	Not Applicable	Diabetic foot ulcers	sample collection	Tissue	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB4	Patient 2	Microbiota	Patient 2	female	84 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB5	Patient 3	Microbiota	Patient 3	male	62 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB6	Patient 5	Microbiota	Patient 5	female	64 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB7	Patient 6	Microbiota	Patient 6	female	81 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB8	Patient 7	Microbiota	Patient 7	female	84 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB9	Patient 8	Microbiota	Patient 8	male	61 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB10	Patient 9	Microbiota	Patient 9	female	57 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB11	Patient 11	Microbiota	Patient 11	female	83 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineB12	Patient 12	Microbiota	Patient 12	male	52 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineC1	Patient 13	Microbiota	Patient 13	male	75 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineC2	Patient 14	Microbiota	Patient 14	female	63 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineC3	Patient 15	Microbiota	Patient 15	male	65 year	Skin swab	Not Applicable	contralateral heathy foot	sample collection	Skin swab	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineC4	Patient 2	Microbiota	Patient 2	female	84 year	Skin Tissue	Space Flight	Diabetic foot ulcers	sample collection	ISS tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC5	Patient 3	Microbiota	Patient 3	male	62 year	Skin Tissue	Space Flight	Diabetic foot ulcers	sample collection	ISS tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC6	Patient 5	Microbiota	Patient 5	female	64 year	Skin Tissue	Space Flight	Diabetic foot ulcers	sample collection	ISS tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC7	Patient 6	Microbiota	Patient 6	female	81 year	Skin Tissue	Space Flight	Diabetic foot ulcers	sample collection	ISS tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC8	Patient 8	Microbiota	Patient 8	male	61 year	Skin Tissue	Space Flight	Diabetic foot ulcers	sample collection	ISS tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC9	Patient 9	Microbiota	Patient 9	female	57 year	Skin Tissue	Space Flight	Diabetic foot ulcers	sample collection	ISS tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC10	Patient 2	Microbiota	Patient 2	female	84 year	Skin Tissue	Ground Control	Diabetic foot ulcers	sample collection	Earth control tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC11	Patient 3	Microbiota	Patient 3	male	62 year	Skin Tissue	Ground Control	Diabetic foot ulcers	sample collection	Earth control tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineC12	Patient 5	Microbiota	Patient 5	female	64 year	Skin Tissue	Ground Control	Diabetic foot ulcers	sample collection	Earth control tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineD1	Patient 6	Microbiota	Patient 6	female	81 year	Skin Tissue	Ground Control	Diabetic foot ulcers	sample collection	Earth control tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineD2	Patient 8	Microbiota	Patient 8	male	61 year	Skin Tissue	Ground Control	Diabetic foot ulcers	sample collection	Earth control tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineD3	Patient 9	Microbiota	Patient 9	female	57 year	Skin Tissue	Ground Control	Diabetic foot ulcers	sample collection	Earth control tissue sample	30 day	30 degree Celsius	phosphate buffered saline	15 - 18 degree Celsius
+lane1TineD4	Negative control 1	Microbiota	Negative control 1	Not Applicable	Not applicable	Not Applicable	Not Applicable	Negative Control	sample collection	RNase/DNase free water	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineD5	Negative control 2	Microbiota	Negative control 2	Not Applicable	Not applicable	Not Applicable	Not Applicable	Negative Control	sample collection	PBS	Not applicable	Not applicable	Not Applicable	Not applicable
+lane1TineD6	Negative control 3	Microbiota	Negative control 3	Not Applicable	Not applicable	Not Applicable	Not Applicable	Negative Control	sample collection	PBS with uninoculated swab	Not applicable	Not applicable	Not Applicable	Not applicable
