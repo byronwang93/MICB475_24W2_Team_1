@@ -21,7 +21,8 @@ for (pkg in pkgs) {
 # when asked if you want to update all, some or none please type "n" for none
 
 # After installing all of its above dependencies, install ggpicrust2
-install.packages("ggpicrust2")
+# install.packages("ggpicrust2")
+devtools::install_github("cafferychen777/ggpicrust2")
 
 #### Load packages ####
 # Load all necessary libraries
@@ -37,12 +38,16 @@ library(ggh4x)
 
 #### Import files and preparing tables ####
 #Importing the pathway PICrsut2
-abundance_file <- "picrust2_out_pipeline/pathways_out/pathway_abundance.tsv"
-abundance_data <- read_delim(abundance_file, delim = "\t", col_names = TRUE, trim_ws = TRUE)
+# abundance_file <- "picrust2_out_pipeline/pathways_out/pathway_abundance.tsv"
+abundance_file <- "pathway_abundance.tsv"
+#abundance_data <- read_delim(abundance_file, delim = "\t", col_names = TRUE, trim_ws = TRUE)
+abundance_data <- read.delim(abundance_file, header = TRUE, skip = 1, sep = "\t")
+
+
 abundance_data  =as.data.frame(abundance_data)
 
 #Import your metadata file, no need to filter yet
-metadata <- read_delim("ulcer_metadata.tsv")
+metadata <- read_delim("ulcers_metadata.tsv")
 
 #Example Looking at subject number
 #If you have multiple variants, filter your metadata to include only 2 at a time
@@ -51,9 +56,17 @@ metadata <- read_delim("ulcer_metadata.tsv")
 metadata = metadata[!is.na(metadata$subject),]
 
 #Filtering the abundance table to only include samples that are in the filtered metadata
-sample_names = metadata$'sample-id'
-sample_names = append(sample_names, "pathway")
-abundance_data_filtered = abundance_data[, colnames(abundance_data) %in% sample_names] #This step is the actual filtering
+#sample_names = metadata$'sample-id'
+#sample_names = append(sample_names, "pathway")
+#abundance_data_filtered = abundance_data[, colnames(abundance_data) %in% sample_names] #This step is the actual filtering
+# Use the correct identifier column name ("X.OTU.ID") along with your sample names:
+sample_names <- metadata$`sample-id`
+sample_names <- c(sample_names, "X.OTU.ID")   # instead of append(..., "pathway")
+# Filter abundance_data so it includes only the columns in sample_names
+abundance_data_filtered <- abundance_data[, colnames(abundance_data) %in% sample_names]
+
+# inspect cols
+colnames(abundance_data)
 
 #Removing individuals with no data that caused a problem for pathways_daa()
 abundance_data_filtered =  abundance_data_filtered[, colSums(abundance_data_filtered != 0) > 0]
@@ -67,8 +80,14 @@ metadata = metadata[metadata$`sample-id` %in% abun_samples,] #making sure the fi
 
 #### DESEq ####
 #Perform pathway DAA using DESEQ2 method
-abundance_daa_results_df <- pathway_daa(abundance = abundance_data_filtered %>% column_to_rownames("pathway"), 
-                                        metadata = metadata, group = "subject", daa_method = "DESeq2")
+#abundance_daa_results_df <- pathway_daa(abundance = abundance_data_filtered %>% column_to_rownames("pathway"), 
+#                                        metadata = metadata, group = "subject", daa_method = "DESeq2")
+abundance_daa_results_df <- pathway_daa(
+  abundance = abundance_data_filtered %>% column_to_rownames("X.OTU.ID"),
+  metadata = metadata,
+  group = "subject",
+  daa_method = "DESeq2"
+)
 
 # Annotate MetaCyc pathway so they are more descriptive
 metacyc_daa_annotated_results_df <- pathway_annotation(pathway = "MetaCyc", 
@@ -84,7 +103,7 @@ feature_desc = feature_desc[,c(1:7)]
 colnames(feature_desc) = colnames(feature_with_p_0.05)
 
 #Changing the pathway column to description for the abundance table
-abundance = abundance_data_filtered %>% filter(pathway %in% feature_with_p_0.05$feature)
+abundance = abundance_data_filtered %>% filter(`X.OTU.ID` %in% feature_with_p_0.05$feature)
 colnames(abundance)[1] = "feature"
 abundance_desc = inner_join(abundance,metacyc_daa_annotated_results_df, by = "feature")
 abundance_desc$feature = abundance_desc$description
@@ -94,8 +113,10 @@ abundance_desc = abundance_desc[,-c(34:ncol(abundance_desc))]
 # Generate a heatmap
 pathway_heatmap(abundance = abundance_desc %>% column_to_rownames("feature"), metadata = metadata, group = "subject")
 
+# necessary metadata col rename for pca func
+colnames(metadata)[colnames(metadata) == "sample-id"] <- "sample_name"
 # Generate pathway PCA plot
-pathway_pca(abundance = abundance_data_filtered %>% column_to_rownames("pathway"), metadata = metadata, group = "subject")
+pathway_pca(abundance = abundance_data_filtered %>% column_to_rownames("X.OTU.ID"), metadata = metadata, group = "subject")
 
 # Generating a bar plot representing log2FC from the custom deseq2 function
 
@@ -105,9 +126,9 @@ pathway_pca(abundance = abundance_data_filtered %>% column_to_rownames("pathway"
 source("DESeq2_function.R")
 
 # Run the function on your own data
-res =  DEseq2_function(abundance_data_filtered, metadata, "subject")
-res$feature =rownames(res)
-res_desc = inner_join(res,metacyc_daa_annotated_results_df, by = "feature")
+res = DEseq2_function(abundance_data_filtered, metadata, "sample_condition", id_col = "X.OTU.ID")
+res$feature = rownames(res)
+res_desc = inner_join(res, metacyc_daa_annotated_results_df, by = "feature")
 res_desc = res_desc[, -c(8:13)]
 View(res_desc)
 

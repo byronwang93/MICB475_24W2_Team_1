@@ -2,11 +2,11 @@
 # 1-the filtered abundance table with pathways in the first column and no rownames
 # 2-the filtered metadata
 
-DEseq2_function = function(abundance_table,metadata,col_of_interest){
+DEseq2_function = function(abundance_table,metadata,col_of_interest,id_col = "pathway"){
   
   
   DESeq2_metadata <- metadata
-  DESeq2_abundance_mat <- abundance_table %>% column_to_rownames("pathway")
+  DESeq2_abundance_mat <- abundance_table %>% column_to_rownames(id_col)
   
   
   DESeq2_colnames <- colnames(DESeq2_metadata)
