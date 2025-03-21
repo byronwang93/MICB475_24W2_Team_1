@@ -43,8 +43,10 @@ abundance_file <- "pathway_abundance.tsv"
 #abundance_data <- read_delim(abundance_file, delim = "\t", col_names = TRUE, trim_ws = TRUE)
 abundance_data <- read.delim(abundance_file, header = TRUE, skip = 1, sep = "\t")
 
-
 abundance_data  =as.data.frame(abundance_data)
+
+# specify desktop path - for figure export
+desktop_path <- file.path(Sys.getenv("HOME"), "Desktop")
 
 #Import your metadata file, no need to filter yet
 metadata <- read_delim("ulcers_metadata.tsv")
@@ -111,12 +113,17 @@ abundance_desc$feature = abundance_desc$description
 abundance_desc = abundance_desc[,-c(34:ncol(abundance_desc))] 
 
 # Generate a heatmap
+# Open a PNG device for the heatmap
+png(filename = file.path(desktop_path, "heatmap.png"), width = 1200, height = 600)
 pathway_heatmap(abundance = abundance_desc %>% column_to_rownames("feature"), metadata = metadata, group = "subject")
+dev.off()
 
 # necessary metadata col rename for pca func
 colnames(metadata)[colnames(metadata) == "sample-id"] <- "sample_name"
 # Generate pathway PCA plot
+png(filename = file.path(desktop_path, "pca_plot.png"), width = 800, height = 600)
 pathway_pca(abundance = abundance_data_filtered %>% column_to_rownames("X.OTU.ID"), metadata = metadata, group = "subject")
+dev.off()
 
 # Generating a bar plot representing log2FC from the custom deseq2 function
 
@@ -138,7 +145,10 @@ sig_res = res_desc %>%
 # You can also filter by Log2fold change
 
 sig_res <- sig_res[order(sig_res$log2FoldChange),]
-ggplot(data = sig_res, aes(y = reorder(description, sort(as.numeric(log2FoldChange))), x= log2FoldChange, fill = pvalue))+
+bar_plot <- ggplot(data = sig_res, aes(y = reorder(description, sort(as.numeric(log2FoldChange))), x= log2FoldChange, fill = pvalue))+
   geom_bar(stat = "identity")+ 
   theme_bw()+
   labs(x = "Log2FoldChange", y="Pathways")
+png(filename = file.path(desktop_path, "bar_plot.png"), width = 800, height = 600)
+print(bar_plot)
+dev.off()
