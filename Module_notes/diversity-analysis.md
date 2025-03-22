@@ -60,6 +60,7 @@ library(tidyverse)
 library(vegan)
 library(picante)
 library(ggplot2)
+library(ggsignif)
 
 
 #### Load data ####
@@ -219,4 +220,104 @@ gg_pcoa_wuf
 ggsave("weightedunifrac_pcoa.png"
        , gg_pcoa_wuf
        , height=4, width=5)
+
+#### WILCOXON RANK SUMS 
+
+# generate table of alpha diversity metrics 
+alphadiv <- estimate_richness(ulcers_rare)
+
+# look only at metadata from phyloseq object
+samp_dat <- sample_data(ulcers_rare)
+
+# generate table combining metadata with alpha diversity metrics = now we have our predictor + response in one table! 
+samp_dat_wdiv <- data.frame(samp_dat, alphadiv)
+
+# Wilcoxon test for Shannon
+wilcox.test(Shannon ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.02819
+
+# Graph with Wilcoxon for Shannon
+shan_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=Shannon)) +
+  geom_boxplot() +
+  geom_jitter(width = 0, height = 0) +  # Add jittered dots
+  geom_signif(comparisons = list(c("Space Flight","Ground Control")),
+              y_position = c(2.8),
+              annotations = c("p=0.02819"))+
+  ylim(1.6,max(2.9))+
+                       ggtitle("Shannon Diversity of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
+
+shan_spaceflight
+
+ggsave("Shannon Diversity with Wilcoxon.png", plot = shan_spaceflight, width = 6, height = 4, dpi = 300)
+
+# Wilcoxon test for Simpson
+wilcox.test(Simpson ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.02819
+
+# Graph with Wilcoxon for Simpson
+simp_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=Simpson)) +
+  geom_boxplot() +
+  geom_jitter(width = 0, height = 0) +  # Add jittered dots
+  geom_signif(comparisons = list(c("Space Flight","Ground Control")),
+              y_position = c(0.93),
+              annotations = c("p=0.02819"))+
+  ylim(0.75,max(0.95))+
+  ggtitle("Simpson Diversity of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
+
+simp_spaceflight
+
+ggsave("Simpson Diversity with Wilcoxon.png", plot = simp_spaceflight, width = 6, height = 4, dpi = 300)
+
+# Wilcoxon test for Faith's PD
+wilcox.test(PD ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.05182
+
+#### STRUGGLING WITH THIS SECTION OF CODE ####
+# Wilcoxon test for bray-curtis
+## convert to matrix format 
+bray_matrix <- as.matrix(bc_dm)
+# Ensure metadata contains a column 'Spaceflight' with values 'Ground Control' and 'ISS'
+
+bray_metadata <- data.frame(
+  SampleID = rownames(bray_matrix),
+  Group = ifelse(bray_metadata$Spaceflight == "Ground Control", "A",
+                 ifelse(bray_metadata$Spaceflight == "Space Flight", "B", NA)))  # Assign groups
+
+# Extract pairwise distances between groups
+group_A <- bray_matrix[bray_metadata$Spaceflight == "Ground Control", bray_metadata$Spaceflight == "Ground Control"]
+group_B <- bray_matrix[bray_metadata$Spaceflight == "Space Flight", bray_metadata$Spaceflight == "Space Flight"]
+
+# Remove diagonal elements (self-comparisons)
+
+group_A <- group_A[lower.tri(bray_matrix[bray_metadata$Spaceflight == "Ground Control", bray_metadata$Spaceflight == "Ground Control"])]
+group_B <- group_B[lower.tri(bray_matrix[bray_metadata$Spaceflight == "Space Flight", bray_metadata$Spaceflight == "Space Flight"])]
+
+wilcox.test(group_A, group_B, alternative = "two.sided") #p-value = 0.7128
+length(group_A)  # Should be > 0
+length(group_B)  
+
+#### STRUGGLED ABOVE #### 
+
+#Wilcoxon test for weighted unifrac
+unifrac_matrix <- phyloseq::distance(ulcers_rare, method = "wunifrac")
+
+# Now, extract this distance matrix and the metadata from the phyloseq object
+
+unifrac_matrix <- as.matrix(unifrac_matrix)  # Convert to matrix format
+uni_metadata <- sample_data(ulcers_rare)  # Metadata from phyloseq object
+
+# Making sure samples in uni_metadata match those in unifrac_matrix
+rownames(uni_metadata) <- uni_metadata$SampleID  # Set row names of metadata to sample IDs
+uni_metadata <- uni_metadata[rownames(unifrac_matrix), , drop = FALSE]  # Subset metadata based on UniFrac samples
+
+# Extract pairwise distances between groups (Ground Control vs ISS)
+group_A <- unifrac_matrix[uni_metadata$Group == "Ground Control", uni_metadata$Group == "Ground Control"]
+group_B <- unifrac_matrix[uni_metadata$Group == "Space Flight", uni_metadata$Group == "Space Flight"]
+
+# Remove diagonal elements (self-comparisons)
+group_A <- group_A[lower.tri(group_A)]
+group_B <- group_B[lower.tri(group_B)]
+
+# Run the Wilcoxon test
+wilcox_test_result <- wilcox.test(group_A, group_B, alternative = "two.sided")
+
+# Output the result
+wilcox_test_result
 ```
