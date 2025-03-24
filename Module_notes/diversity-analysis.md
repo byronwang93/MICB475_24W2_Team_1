@@ -269,6 +269,20 @@ ggsave("Simpson Diversity with Wilcoxon.png", plot = simp_spaceflight, width = 6
 # Wilcoxon test for Faith's PD
 wilcox.test(PD ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.05182
 
+# Graph with Wilcoxon for Faith's PD
+PD_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=`PD`)) +
+  geom_boxplot() +
+  geom_jitter(width = 0, height = 0) +  # Add jittered dots
+  geom_signif(comparisons = list(c("Space Flight","Ground Control")),
+              y_position = c(3.6),
+              annotations = c("p=0.05182"))+
+  ylim(0.2,max(4))+
+  ggtitle("Faith's PD of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
+
+PD_spaceflight
+
+ggsave("Faith's PD with Wilcoxon.png", plot = PD_spaceflight, width = 6, height = 4, dpi = 300)
+
 #### STRUGGLING WITH THIS SECTION OF CODE ####
 # Wilcoxon test for bray-curtis
 ## convert to matrix format 
