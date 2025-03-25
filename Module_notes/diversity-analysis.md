@@ -51,8 +51,7 @@ cp ulcers_metadata.tsv /data/ulcers/ulcers_export_div
 scp -r root@10.19.139.161:~/data/ulcers/ulcers_export_div .
 
 ```
-
-### working in R... is this needed? 
+### Creating Phyloseq Object in R
 ```
 library(phyloseq)
 library(ape) # importing trees
@@ -220,7 +219,9 @@ gg_pcoa_wuf
 ggsave("weightedunifrac_pcoa.png"
        , gg_pcoa_wuf
        , height=4, width=5)
-
+```
+### Wilcoxon Rank Sums for Alpha Diversity Metrics
+```
 #### WILCOXON RANK SUMS 
 
 # generate table of alpha diversity metrics 
@@ -282,56 +283,47 @@ PD_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=`PD`)) +
 PD_spaceflight
 
 ggsave("Faith's PD with Wilcoxon.png", plot = PD_spaceflight, width = 6, height = 4, dpi = 300)
+```
+### Wilcoxon Rank Sums for Beta Diversity Metrics
+```
 
-#### STRUGGLING WITH THIS SECTION OF CODE ####
 # Wilcoxon test for bray-curtis
 ## convert to matrix format 
 bray_matrix <- as.matrix(bc_dm)
-# Ensure metadata contains a column 'Spaceflight' with values 'Ground Control' and 'ISS'
 
-bray_metadata <- data.frame(
-  SampleID = rownames(bray_matrix),
-  Group = ifelse(bray_metadata$Spaceflight == "Ground Control", "A",
-                 ifelse(bray_metadata$Spaceflight == "Space Flight", "B", NA)))  # Assign groups
+# Get sample metadata from the phyloseq object
+bray_metadata <- data.frame(sample_data(ulcers_rare))
 
-# Extract pairwise distances between groups
-group_A <- bray_matrix[bray_metadata$Spaceflight == "Ground Control", bray_metadata$Spaceflight == "Ground Control"]
-group_B <- bray_matrix[bray_metadata$Spaceflight == "Space Flight", bray_metadata$Spaceflight == "Space Flight"]
+# Make sure metadata and distance matrix rows match
+bray_metadata <- bray_metadata[rownames(bray_matrix), ]
 
-# Remove diagonal elements (self-comparisons)
+# Identify groups
+bray_group_A_samples <- rownames(bray_metadata[bray_metadata$Spaceflight == "Ground Control", ])
+bray_group_B_samples <- rownames(bray_metadata[bray_metadata$Spaceflight == "Space Flight", ])
 
-group_A <- group_A[lower.tri(bray_matrix[bray_metadata$Spaceflight == "Ground Control", bray_metadata$Spaceflight == "Ground Control"])]
-group_B <- group_B[lower.tri(bray_matrix[bray_metadata$Spaceflight == "Space Flight", bray_metadata$Spaceflight == "Space Flight"])]
+# Compute pairwise **within-group** distances
+bray_group_A_dist <- bray_matrix[bray_group_A_samples, bray_group_A_samples][lower.tri(bray_matrix[bray_group_A_samples, bray_group_A_samples])]
+bray_group_B_dist <- bray_matrix[bray_group_B_samples, bray_group_B_samples][lower.tri(bray_matrix[bray_group_B_samples, bray_group_B_samples])]
 
-wilcox.test(group_A, group_B, alternative = "two.sided") #p-value = 0.7128
-length(group_A)  # Should be > 0
-length(group_B)  
+wilcox.test(bray_group_A_dist, bray_group_B_dist, alternative = "two.sided") #p-value = 0.009116
 
-#### STRUGGLED ABOVE #### 
+# Wilcoxon test for weighted unifrac
+## convert to matrix format 
+uni_matrix <- as.matrix(wuf_dm)
 
-#Wilcoxon test for weighted unifrac
-unifrac_matrix <- phyloseq::distance(ulcers_rare, method = "wunifrac")
+# Get sample metadata from the phyloseq object
+uni_metadata <- data.frame(sample_data(ulcers_rare))
 
-# Now, extract this distance matrix and the metadata from the phyloseq object
+# Make sure metadata and distance matrix rows match
+uni_metadata <- uni_metadata[rownames(uni_matrix), ]
 
-unifrac_matrix <- as.matrix(unifrac_matrix)  # Convert to matrix format
-uni_metadata <- sample_data(ulcers_rare)  # Metadata from phyloseq object
+# Identify groups
+uni_group_A_samples <- rownames(uni_metadata[uni_metadata$Spaceflight == "Ground Control", ])
+uni_group_B_samples <- rownames(uni_metadata[uni_metadata$Spaceflight == "Space Flight", ])
 
-# Making sure samples in uni_metadata match those in unifrac_matrix
-rownames(uni_metadata) <- uni_metadata$SampleID  # Set row names of metadata to sample IDs
-uni_metadata <- uni_metadata[rownames(unifrac_matrix), , drop = FALSE]  # Subset metadata based on UniFrac samples
+# Compute pairwise **within-group** distances
+uni_group_A_dist <- uni_matrix[uni_group_A_samples, uni_group_A_samples][lower.tri(uni_matrix[uni_group_A_samples, uni_group_A_samples])]
+uni_group_B_dist <- uni_matrix[uni_group_B_samples, uni_group_B_samples][lower.tri(uni_matrix[uni_group_B_samples, uni_group_B_samples])]
 
-# Extract pairwise distances between groups (Ground Control vs ISS)
-group_A <- unifrac_matrix[uni_metadata$Group == "Ground Control", uni_metadata$Group == "Ground Control"]
-group_B <- unifrac_matrix[uni_metadata$Group == "Space Flight", uni_metadata$Group == "Space Flight"]
-
-# Remove diagonal elements (self-comparisons)
-group_A <- group_A[lower.tri(group_A)]
-group_B <- group_B[lower.tri(group_B)]
-
-# Run the Wilcoxon test
-wilcox_test_result <- wilcox.test(group_A, group_B, alternative = "two.sided")
-
-# Output the result
-wilcox_test_result
+wilcox.test(uni_group_A_dist, uni_group_B_dist, alternative = "two.sided") #p-value = 0.01716
 ```
