@@ -1,47 +1,54 @@
-#This function takes two variables.
-# 1-the filtered abundance table with pathways in the first column and no rownames
-# 2-the filtered metadata
-
-DEseq2_function = function(abundance_table,metadata,col_of_interest,id_col = "pathway"){
+DEseq2_function <- function(abundance_table, metadata, col_of_interest, id_col = "pathway"){
   
+  # Check if the column exists in metadata
+  if(!col_of_interest %in% colnames(metadata)){
+    stop(paste("Column", col_of_interest, "not found in metadata."))
+  }
   
+  # Create copies of data
   DESeq2_metadata <- metadata
   DESeq2_abundance_mat <- abundance_table %>% column_to_rownames(id_col)
   
+  # Rename the column of interest to "Group"
+  colnames(DESeq2_metadata)[colnames(DESeq2_metadata) == col_of_interest] <- "Group"
+  DESeq2_metadata$Group <- as.factor(DESeq2_metadata$Group)
   
-  DESeq2_colnames <- colnames(DESeq2_metadata)
-# Update the subject part to your own metadata column of interest
-  DESeq2_colnames[DESeq2_colnames == col_of_interest] <- "Group_group_nonsense"
-  colnames(DESeq2_metadata) <- DESeq2_colnames
-  DESeq2_metadata = as.data.frame(DESeq2_metadata)
-  DESeq2_metadata[,"Group_group_nonsense"] <- as.factor(DESeq2_metadata[,"Group_group_nonsense"])
+  # Generate all pairwise combinations of groups (as a list)
+  group_levels <- unique(DESeq2_metadata$Group)
+  if(length(group_levels) < 2){
+    stop("There are fewer than 2 groups in the Group column.")
+  }
+  group_combinations <- utils::combn(group_levels, 2, simplify = FALSE)
   
-  # Generate combinations of groups for comparison
-  DESeq2_combinations <- utils::combn(unique(DESeq2_metadata[, "Group_group_nonsense"]), 2)
-  DESeq2_results <- list()
+  results_list <- list()
   
-  # Loop through combinations and perform DESeq2 analysis
   message("Performing pairwise comparisons with DESeq2...")
-  for (i in seq_len(ncol(DESeq2_combinations))) {
-    j <- DESeq2_combinations[, i]
+  for(comb in group_combinations){
+    # Subset metadata and counts for samples in this combination
+    keep <- DESeq2_metadata$Group %in% comb
+    sub_metadata <- DESeq2_metadata[keep, ]
+    sub_counts <- DESeq2_abundance_mat[, keep, drop = FALSE]
+    sub_counts <- round(sub_counts)
     
-    # Subsetting the data for the current combination of groups
-    DESeq2_sub_group <- DESeq2_metadata$Group_group_nonsense %in% j
-    DESeq2_metadata_sub <- DESeq2_metadata[DESeq2_sub_group,]
-    DESeq2_abundance_mat_sub <- DESeq2_abundance_mat[, DESeq2_sub_group]
-    DESeq2_abundance_mat_sub <- round(DESeq2_abundance_mat_sub)
-    
-    # Creating DESeq2 object and performing analysis
-    DESeq2_object <- DESeq2::DESeqDataSetFromMatrix(
-      countData = DESeq2_abundance_mat_sub,
-      colData = DESeq2_metadata_sub,
-      design = ~ Group_group_nonsense
+    dds <- DESeq2::DESeqDataSetFromMatrix(
+      countData = sub_counts,
+      colData = sub_metadata,
+      design = ~ Group
     )
-    DESeq2_object <- BiocGenerics::estimateSizeFactors(DESeq2_object, type = "poscounts")
-    DESeq2_object_finish <- DESeq2::DESeq(DESeq2_object)
-    DESeq2_results[[i]] <- DESeq2::results(DESeq2_object_finish)
-    results = as.data.frame(DESeq2_results)
+    dds <- BiocGenerics::estimateSizeFactors(dds, type = "poscounts")
+    dds <- DESeq2::DESeq(dds)
+    res <- DESeq2::results(dds)
+    
+    # Convert results to data frame and add identifier columns
+    res_df <- as.data.frame(res)
+    res_df$Comparison <- paste(comb, collapse = "_vs_")
+    res_df$feature <- rownames(res_df)
+    
+    results_list[[paste(comb, collapse = "_vs_")]] <- res_df
   }
   
-  return(results)
+  # Combine results from all comparisons
+  combined_results <- dplyr::bind_rows(results_list)
+  
+  return(combined_results)
 }
