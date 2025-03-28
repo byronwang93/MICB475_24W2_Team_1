@@ -49,6 +49,9 @@ metadata <- metadata[!is.na(metadata$subject), ]
 # Filter metadata to only include samples where "Spaceflight" is either "Space Flight" or "Ground Control"
 metadata <- metadata[metadata$Spaceflight %in% c("Space Flight", "Ground Control"), ]
 
+# Set factor levels so "Ground Control" is the reference group
+metadata$Spaceflight <- factor(metadata$Spaceflight, levels = c("Ground Control", "Space Flight"))
+
 # -----------------------------
 # Filtering abundance_data
 # -----------------------------
@@ -118,7 +121,7 @@ png(filename = file.path(desktop_path, "heatmap.png"), width = 1200, height = 60
 pathway_heatmap(
   abundance = abundance_desc %>% column_to_rownames("feature"),
   metadata = metadata,
-  group = "subject"
+  group = "Spaceflight"
 )
 dev.off()
 
@@ -149,7 +152,7 @@ source("DESeq2_function.R")
 
 # Run the function.
 # Change "subject" below to the column you want to use for grouping if needed.
-res <- DEseq2_function(abundance_data_filtered, metadata, "subject", id_col = "X.OTU.ID")
+res <- DEseq2_function(abundance_data_filtered, metadata, "Spaceflight", id_col = "X.OTU.ID")
 
 # Verify DESeq2 results
 cat("DESeq2 results summary:\n")
@@ -231,6 +234,6 @@ png(filename = file.path(desktop_path, "pca_plot.png"), width = 800, height = 60
 pathway_pca(
   abundance = abundance_for_pca,
   metadata = metadata,
-  group = "subject"
+  group = "Spaceflight"
 )
 dev.off()
