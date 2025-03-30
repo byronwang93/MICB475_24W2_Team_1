@@ -52,9 +52,7 @@ metadata <- metadata[metadata$Spaceflight %in% c("Space Flight", "Ground Control
 # Set factor levels so "Ground Control" is the reference group
 metadata$Spaceflight <- factor(metadata$Spaceflight, levels = c("Ground Control", "Space Flight"))
 
-# -----------------------------
 # Filtering abundance_data
-# -----------------------------
 # Use the metadata column "sample-id" for sample names
 sample_names <- as.character(metadata$`sample-id`)
 # Remove any occurrence of "X.OTU.ID" if it exists in sample_names (it shouldn’t, but just in case)
@@ -144,9 +142,7 @@ remaining_samples <- colnames(abundance_for_pca)
 metadata <- metadata[metadata$sample_name %in% remaining_samples, ]
 
 
-# -----------------------------
 # Generate Bar Plot of log2FC from custom DESeq2 function
-# -----------------------------
 # Load the DESeq2 function
 source("DESeq2_function.R")
 
@@ -237,3 +233,45 @@ pathway_pca(
   group = "Spaceflight"
 )
 dev.off()
+
+# Generate volcano plot for all pathways
+# Remove rows with NA in pvalue or log2FoldChange
+res_desc_clean <- res_desc %>% filter(!is.na(pvalue) & !is.na(log2FoldChange))
+# Create a volcano plot using res_desc, which contains the DESeq2 results merged with pathway annotations.
+volcano_plot <- ggplot(res_desc_clean, aes(x = log2FoldChange, y = -log10(pvalue))) +
+  geom_point(aes(color = pvalue < 0.05)) +
+  scale_color_manual(values = c("black", "red"), 
+                     labels = c("Not Significant", "p < 0.05"),
+                     name = "Significance") +
+  labs(
+    x = "log2(Fold Change) (Spaceflight vs. Ground Control)",
+    y = "-log10(p-value)",
+    title = "Volcano Plot: Differential Abundance of Pathways"
+  ) +
+  theme_bw() +
+  theme(
+    text = element_text(size = 12),
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5)
+  )
+
+
+# Print volcano plot to console to verify it
+print(volcano_plot)
+
+# Save the volcano plot to a file on your desktop
+png(filename = file.path(desktop_path, "volcano_plot.png"), width = 800, height = 600)
+print(volcano_plot)
+dev.off()
+
+# Filter out rows with NA in pvalue and sort by pvalue
+top_pathways <- res_desc %>% 
+  filter(!is.na(pvalue)) %>% 
+  arrange(pvalue) %>% 
+  head(2)  # This returns the two most significant pathways
+
+# Print the top two pathways
+print(top_pathways)
+# 1 palmitate biosynthesis II (bacteria and plants)
+# 2    purine nucleobases degradation I (anaerobic)
+
