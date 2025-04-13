@@ -2,10 +2,7 @@
 # Install and load the necessary packages
 library(tidyverse)
 library(phyloseq)
-library(vegan)
-library(ape)
 library(cowplot)
-
 
 
 #### Load the data ####
@@ -26,7 +23,6 @@ phylotreefp <- "ulcers_export_div/tree.nwk"
 phylotree <- read.tree(phylotreefp)
 
 
-
 #### Create phyloseq object ####
 
 # 1. Format OTU table
@@ -40,7 +36,6 @@ rownames(otu_mat) <- otu$`#OTU ID`
 # Use the "otu_table" function to make an OTU table
 OTU <- otu_table(otu_mat, taxa_are_rows = TRUE) 
 
-
 # 2. Format sample metadata
 
 # Save everything except sampleid as new data frame
@@ -49,7 +44,6 @@ samp_df <- as.data.frame(meta[,-1])
 rownames(samp_df)<- meta$'sample-id'
 # Make phyloseq sample data with sample_data() function
 SAMP <- sample_data(samp_df)
-
 
 # 3. Format taxonomy table
 
@@ -68,8 +62,6 @@ TAX <- tax_table(tax_mat)
 # 4. Merge all into a phyloseq object
 ulcers <- phyloseq(OTU, SAMP, TAX, phylotree)
 
-
-
 #### Filter the data ####
 
 # 1. Remove samples where Spaceflight is "Not Applicable"
@@ -79,7 +71,6 @@ ulcers_filt <- subset_samples(ulcers, Spaceflight !="No Applicable")
 ulcers_final <- subset_taxa(ulcers_filt,  Domain == "d__Bacteria" & Class!="c__Chloroplast" & Family !="f__Mitochondria")
 
 
-
 #### Saving phyloseq object #####
 
 # You could save the final phyloseq object and load it in a new R script
@@ -87,19 +78,16 @@ ulcers_final <- subset_taxa(ulcers_filt,  Domain == "d__Bacteria" & Class!="c__C
 save(ulcers_final, file="ulcers_final.RData")
 
 
-
 #### Creating taxonomy bar plots ####
 
 # 1. Convert to relative abundance
-ulcers_RA <- transform_sample_counts(ulcers_final, fun=function(x) x/sum(x))
-
+ulcers_RA <- transform_sample_counts(ulcers_final, fun=function(x) x/sum(x)*100)
 
 # 2v1. "glom" at taxonomic levels Phylum, Family and Genus
 # this version does not sorting by abundance
 ulcers_phylum <- tax_glom(ulcers_RA, taxrank = "Phylum", NArm=FALSE)
 ulcers_family <- tax_glom(ulcers_RA, taxrank = "Family", NArm=FALSE)
 ulcers_genus <- tax_glom(ulcers_RA, taxrank = "Genus", NArm=FALSE)
-
 
 # 2v2. Order taxa groups from highest to lowest relative abundance within each sample
 # Repeat the following code for each taxonomic rank
@@ -128,60 +116,62 @@ phylum_order <- ulcers_df %>%
 # - Then factor level globally
 sortedRA_phylum$Phylum <- factor(sortedRA_phylum$Phylum, levels = phylum_order)
 
-
 # 3v1a. Create taxa bar plots (with unsorted phyloseq object)
 
-gg_phylum <- plot_bar(ulcers_phylum, fill="Phylum") + 
+gg_phylum <- plot_bar(ulcers_phylum, x = "subject", fill="Phylum") + 
   facet_wrap(.~Spaceflight, scales = "free_x") +
   geom_bar(stat = "identity", position = "stack", colour = NA) +
   theme(axis.text.x = element_text(angle = 90, hjust = 0.95)) +
+  xlab("Sample (Patient #)") +
   theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0))) +
-  ylab("Relative Abundance") +
+  ylab("Relative Abundance (%)") +
   guides(fill = guide_legend(ncol = 1)) + 
   theme(legend.position = "right", legend.justification.right="left") +
   theme(
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14),
     strip.text = element_text(size = 14),
-    legend.text = element_text(size = 12),
-    legend.title = element_text(size = 14) 
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 18, face = "bold") 
   ) +
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 
-gg_family <- plot_bar(ulcers_family, fill="Family") + 
+gg_family <- plot_bar(ulcers_family, x = "subject", fill="Family") + 
   facet_wrap(.~Spaceflight, scales = "free_x") +
   geom_bar(stat = "identity", position = "stack", colour = NA) +
   theme(axis.text.x = element_text(angle = 90, hjust = 0.95)) +
+  xlab("Sample (Patient #)") +
   theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0))) +
-  ylab("Relative Abundance") +
-  guides(fill = guide_legend(ncol = 1)) + 
+  ylab("Relative Abundance (%)") +
+  guides(fill = guide_legend(ncol = 2)) + 
   theme(legend.position = "right", legend.justification.right="left") +
   theme(
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14),
     strip.text = element_text(size = 14),
-    legend.text = element_text(size = 12),
-    legend.title = element_text(size = 14) 
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 18, face = "bold") 
   ) +
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 
-gg_genus <- plot_bar(ulcers_genus, fill="Genus") + 
+gg_genus <- plot_bar(ulcers_genus, x = "subject", fill="Genus") + 
   facet_wrap(.~Spaceflight, scales = "free_x") +
   geom_bar(stat = "identity", position = "stack", colour = NA) +
   theme(axis.text.x = element_text(angle = 90, hjust = 0.95)) +
+  xlab("Sample (Patient #)") +
   theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0))) +
-  ylab("Relative Abundance") +
-  guides(fill = guide_legend(ncol = 1)) + 
+  ylab("Relative Abundance (%)") +
+  guides(fill = guide_legend(ncol = 2)) + 
   theme(legend.position = "right", legend.justification.right ="left") +
   theme(
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14),
     strip.text = element_text(size = 14),
-    legend.text = element_text(size = 12),
-    legend.title = element_text(size = 14) 
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 18, face = "bold") 
   ) +
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 
@@ -189,7 +179,6 @@ gg_genus <- plot_bar(ulcers_genus, fill="Genus") +
 gg_genus_2 <- gg_genus +
   guides(fill = guide_legend(ncol = 3)) + 
   theme(legend.position = "bottom", legend.justification.bottom ="left")
-
 
 # 3v2. Create taxa bar plots (with sorted dataframe)
 # Repeat the following code for each taxonomic rank
@@ -205,19 +194,19 @@ gg_phy <- ggplot(sortedRA_phylum, aes(x = Sample, y = Abundance, fill=Phylum)) +
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14),
     strip.text = element_text(size = 14),
-    legend.text = element_text(size = 12),
+    legend.text = element_text(size = 14),
     legend.title = element_text(size = 14) 
   ) +
   theme(plot.margin = unit(c(1,1,1,1), "lines"))
 
-
 # 4. Combine plots
 gg_all <- plot_grid(gg_phylum, gg_family, gg_genus,
                     labels = c("A", "B", "C"),
-                    label_size = 40,
+                    label_size = 30,
+                    label_fontface = "plain",
                     align = "v",
-                    hjust = -1,
-                    ncol = 3)
+                    hjust = 0,
+                    nrow = 3)
 
 # 5. Save plots
 ggsave("plot_phylum.png"
@@ -234,4 +223,4 @@ ggsave("plot_genus.png"
 
 ggsave("plot_phylum-family-genus.png"
        , gg_all
-       , height=9, width =34)
+       , height=15, width = 20, dpi = 300)
