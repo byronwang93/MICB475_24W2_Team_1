@@ -275,3 +275,6 @@ print(top_pathways)
 # 1 palmitate biosynthesis II (bacteria and plants)
 # 2    purine nucleobases degradation I (anaerobic)
 
+# see how many pathways in total are changed
+cat("Total significantly changed pathways (p < 0.05):", nrow(sig_res), "\n")
+# Total significantly changed pathways (p < 0.05): 51
