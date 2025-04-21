@@ -138,29 +138,32 @@ save(ulcers_phylo_final, file="ulcers_phylo_final.RData")
 
 rarefaction_curve <- rarecurve(t(as.data.frame(otu_table(ulcers_phylo_final))), cex=0.1) # gives us a rarefaction curve 
 
+set.seed(1)
+
 ulcers_rare <- rarefy_even_depth(ulcers_phylo_final, rngseed = 1, sample.size = 4008) # sampling depth was decided during data wrangling by Byron
 
 #### save rarefaction data
+
 save(ulcers_rare, file="ulcers_rare.RData")
 
 #### Alpha diversity - Shannon and Simpson #####
 plot_richness(ulcers_rare) 
 
-# only want to look at Shannon and Simpson 
-plot_richness(ulcers_rare, measures = c("Shannon", "Simpson")) 
+# only want to look at Shannon, Simpson, and Observed
+plot_richness(ulcers_rare, measures = c("Shannon", "Simpson", "Observed")) 
 
 # make it into a box plot
-gg_richness <- plot_richness(ulcers_rare, x = "Spaceflight", measures = c("Shannon","Simpson")) +
+gg_richness <- plot_richness(ulcers_rare, x = "Spaceflight", measures = c("Shannon","Simpson", "Observed")) +
   xlab("Spaceflight") +
   geom_boxplot()
 gg_richness
 
 # save image
-ggsave(filename = "shannon_simpson.png"
+ggsave(filename = "shannon_simpson_observed.png"
        , gg_richness
        , height=4, width=6)
 
-# calculate Faith's phylogenetic diversity as PD
+# calculate Faiths phylogenetic diversity as PD
 # measures phylogenetic distance 
 phylo_dist <- pd(t(otu_table(ulcers_rare)), phy_tree(ulcers_rare),
                  include.root=F) 
@@ -169,10 +172,11 @@ phylo_dist <- pd(t(otu_table(ulcers_rare)), phy_tree(ulcers_rare),
 sample_data(ulcers_rare)$PD <- phylo_dist$PD
 
 # plot any metadata category against the PD
-plot.pd <- ggplot(sample_data(ulcers_rare), aes(Spaceflight, PD)) + 
+plot.pd <- ggplot(sample_data(ulcers_rare), aes(Spaceflight, PD, fill = Spaceflight)) + 
   geom_boxplot() +
+  scale_fill_manual(values = c("blue", "red")) +
   xlab("Spaceflight") +
-  ylab("Faith's PD")
+  ylab("Faith's Phylogenetic Diversity")
 
 # view plot
 plot.pd
@@ -193,11 +197,11 @@ bc_dm <- distance(ulcers_rare, method="bray")
 pcoa_bc <- ordinate(ulcers_rare, method="PCoA", distance=bc_dm)
 
 # take our rarefied phyloseq objects and combine our coordinates that we just generated 
-# for different points, the body size will be identified based on colour 
-# for different points, the subject will be identified based on shape 
-plot_ordination(ulcers_rare, pcoa_bc, color = "Spaceflight")
 
-gg_pcoa_bc <- plot_ordination(ulcers_rare, pcoa_bc, color = "Spaceflight") + # saving it under a variable
+ord.bray <- plot_ordination(ulcers_rare, pcoa_bc, color = "Spaceflight")
+
+gg_pcoa_bc <- plot_ordination(ulcers_rare, pcoa_bc, color = "Spaceflight") + 
+  scale_color_manual(values = c("blue", "red")) +
   labs(col = "Spaceflight") # rename legend names;col = colour channel
 gg_pcoa_bc
 
@@ -212,7 +216,8 @@ pcoa_wuf <- ordinate(ulcers_rare, method="PCoA", distance=wuf_dm)
 
 plot_ordination(ulcers_rare, pcoa_wuf, color = "Spaceflight")
 
-gg_pcoa_wuf <- plot_ordination(ulcers_rare, pcoa_wuf, color = "Spaceflight") + # saving it under a variable
+gg_pcoa_wuf <- plot_ordination(ulcers_rare, pcoa_wuf, color = "Spaceflight") +
+  scale_color_manual(values = c("blue", "red")) +
   labs(col = "Spaceflight") # rename legend names;col = colour channel
 gg_pcoa_wuf
 
@@ -222,8 +227,6 @@ ggsave("weightedunifrac_pcoa.png"
 ```
 ### Wilcoxon Rank Sums for Alpha Diversity Metrics
 ```
-#### WILCOXON RANK SUMS 
-
 # generate table of alpha diversity metrics 
 alphadiv <- estimate_richness(ulcers_rare)
 
@@ -237,93 +240,135 @@ samp_dat_wdiv <- data.frame(samp_dat, alphadiv)
 wilcox.test(Shannon ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.02819
 
 # Graph with Wilcoxon for Shannon
-shan_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=Shannon)) +
+shan_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=Shannon, fill = `Spaceflight`, colour = `Spaceflight`)) +
   geom_boxplot() +
   geom_jitter(width = 0, height = 0) +  # Add jittered dots
   geom_signif(comparisons = list(c("Space Flight","Ground Control")),
               y_position = c(2.8),
-              annotations = c("p=0.02819"))+
+              annotations = c("p=0.03"), color = "black")+
   ylim(1.6,max(2.9))+
-                       ggtitle("Shannon Diversity of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
+                       ggtitle("Shannon Diversity of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples") +
+  scale_fill_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) +
+  scale_color_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) 
+
 
 shan_spaceflight
 
-ggsave("Shannon Diversity with Wilcoxon.png", plot = shan_spaceflight, width = 6, height = 4, dpi = 300)
+ggsave("Shannon_Wilcoxon_Final.png", plot = shan_spaceflight, width = 6, height = 4, dpi = 300)
 
 # Wilcoxon test for Simpson
 wilcox.test(Simpson ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.02819
 
 # Graph with Wilcoxon for Simpson
-simp_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=Simpson)) +
+simp_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=Simpson, fill = `Spaceflight`, colour = `Spaceflight`)) +
   geom_boxplot() +
   geom_jitter(width = 0, height = 0) +  # Add jittered dots
   geom_signif(comparisons = list(c("Space Flight","Ground Control")),
               y_position = c(0.93),
-              annotations = c("p=0.02819"))+
+              annotations = c("p=0.03"), colour = "black")+
   ylim(0.75,max(0.95))+
-  ggtitle("Simpson Diversity of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
+  ggtitle("Simpson Diversity of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples") +
+  scale_fill_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) +
+  scale_color_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) 
 
 simp_spaceflight
 
-ggsave("Simpson Diversity with Wilcoxon.png", plot = simp_spaceflight, width = 6, height = 4, dpi = 300)
+ggsave("Simpson_Wilcoxon_Final.png", plot = simp_spaceflight, width = 6, height = 4, dpi = 300)
+
+# Wilcoxon test for Observed
+wilcox.test(Observed ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.04986
+
+# Graph with Wilcoxon for Observed
+obs_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=Observed, fill = `Spaceflight`, colour = `Spaceflight`)) +
+  geom_boxplot() +
+  geom_jitter(width = 0, height = 0) +  # Add jittered dots
+  geom_signif(comparisons = list(c("Space Flight","Ground Control")),
+              y_position = c(23.3),
+              annotations = c("p=0.05"), colour = "black")+
+  ylim(8,max(24))+
+  ggtitle("Observed Diversity of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples") +
+  scale_fill_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) +
+  scale_color_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) 
+
+obs_spaceflight
+
+ggsave("Observed_Wilcoxon_Final.png", plot = obs_spaceflight, width = 6, height = 4, dpi = 300)
 
 # Wilcoxon test for Faith's PD
 wilcox.test(PD ~ Spaceflight, data=samp_dat_wdiv, exact = FALSE) ## gives us p-value = 0.05182
 
 # Graph with Wilcoxon for Faith's PD
-PD_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=`PD`)) +
+PD_spaceflight <- ggplot(samp_dat_wdiv, aes(x=`Spaceflight`, y=`PD`, fill = `Spaceflight`, colour = `Spaceflight`)) +
   geom_boxplot() +
   geom_jitter(width = 0, height = 0) +  # Add jittered dots
   geom_signif(comparisons = list(c("Space Flight","Ground Control")),
               y_position = c(3.6),
-              annotations = c("p=0.05182"))+
+              annotations = c("p=0.05"), colour = "black")+
   ylim(0.2,max(4))+
-  ggtitle("Faith's PD of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
+  ggtitle("Faith's PD of Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples") +
+  scale_fill_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) +
+  scale_color_manual(values = c("Space Flight" = "red", "Ground Control" = "blue")) +
+  ylab("Faith's Phylogenetic Diversity") 
 
 PD_spaceflight
 
-ggsave("Faith's PD with Wilcoxon.png", plot = PD_spaceflight, width = 6, height = 4, dpi = 300)
+ggsave("PD_Wilcoxon_Final.png", plot = PD_spaceflight, width = 6, height = 4, dpi = 300)
 ```
-### Wilcoxon Rank Sums for Beta Diversity Metrics
+### Permanova for Beta Diversity Metrics
 ```
+dm_braycurtis <- vegdist(t(otu_table(ulcers_rare)), method="bray") # Bray-curtis
 
-# Wilcoxon test for bray-curtis
-## convert to matrix format 
-bray_matrix <- as.matrix(bc_dm)
+set.seed(123)
+adonis2(dm_braycurtis ~ `Spaceflight`, data=samp_dat_wdiv) # p-value = 0.707
 
-# Get sample metadata from the phyloseq object
-bray_metadata <- data.frame(sample_data(ulcers_rare))
+# Replot Bray-Curtis
+ord.bray <- ordinate(ulcers_rare, method = "PCoA", distance = "bray")
 
-# Make sure metadata and distance matrix rows match
-bray_metadata <- bray_metadata[rownames(bray_matrix), ]
+BC_spaceflight <- plot_ordination(ulcers_rare, ord.bray, color = "Spaceflight") +
+  scale_color_manual(values = c("blue", "red")) +
+  stat_ellipse(type = "norm") + 
+  ggtitle("Bray-Curtis for Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
 
-# Identify groups
-bray_group_A_samples <- rownames(bray_metadata[bray_metadata$Spaceflight == "Ground Control", ])
-bray_group_B_samples <- rownames(bray_metadata[bray_metadata$Spaceflight == "Space Flight", ])
+BC_spaceflight
+ggsave("bray_curtis_permanova_final.png", plot = BC_spaceflight, width = 6, height = 4, dpi = 300)
 
-# Compute pairwise **within-group** distances
-bray_group_A_dist <- bray_matrix[bray_group_A_samples, bray_group_A_samples][lower.tri(bray_matrix[bray_group_A_samples, bray_group_A_samples])]
-bray_group_B_dist <- bray_matrix[bray_group_B_samples, bray_group_B_samples][lower.tri(bray_matrix[bray_group_B_samples, bray_group_B_samples])]
+#Weighted UniFrac
+dm_unifrac <- UniFrac(ulcers_rare, weighted = TRUE, normalized = TRUE, fast = TRUE)
 
-wilcox.test(bray_group_A_dist, bray_group_B_dist, alternative = "two.sided") #p-value = 0.009116
+ord.unifrac <- ordinate(ulcers_rare, method="PCoA", distance="dm_unifrac")
 
-# Wilcoxon test for weighted unifrac
-## convert to matrix format 
-uni_matrix <- as.matrix(wuf_dm)
+plot_ordination(ulcers_rare, ord.unifrac, color="Spaceflight")
 
-# Get sample metadata from the phyloseq object
-uni_metadata <- data.frame(sample_data(ulcers_rare))
+set.seed(123)
+adonis2(dm_unifrac ~ `Spaceflight`, data=samp_dat_wdiv) # p-value = 0.724
 
-# Make sure metadata and distance matrix rows match
-uni_metadata <- uni_metadata[rownames(uni_matrix), ]
+# Replot Weighted UniFrac
 
-# Identify groups
-uni_group_A_samples <- rownames(uni_metadata[uni_metadata$Spaceflight == "Ground Control", ])
-uni_group_B_samples <- rownames(uni_metadata[uni_metadata$Spaceflight == "Space Flight", ])
+uni_spaceflight <- plot_ordination(ulcers_rare, ord.unifrac, color = "Spaceflight") +
+  scale_color_manual(values = c("blue", "red")) +
+  stat_ellipse(type = "norm") +
+  ggtitle("Weighted UniFrac for Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
 
-# Compute pairwise **within-group** distances
-uni_group_A_dist <- uni_matrix[uni_group_A_samples, uni_group_A_samples][lower.tri(uni_matrix[uni_group_A_samples, uni_group_A_samples])]
-uni_group_B_dist <- uni_matrix[uni_group_B_samples, uni_group_B_samples][lower.tri(uni_matrix[uni_group_B_samples, uni_group_B_samples])]
+uni_spaceflight
 
-wilcox.test(uni_group_A_dist, uni_group_B_dist, alternative = "two.sided") #p-value = 0.01716
+ggsave("weighted_unifrac_permanova_final.png", plot = uni_spaceflight, width = 6, height = 4, dpi = 300)
+
+#Unweighted UniFrac
+dm_ununifrac <- UniFrac(ulcers_rare, weighted = FALSE, fast = TRUE) 
+
+ord.ununifrac <- ordinate(ulcers_rare, method="PCoA", distance="dm_ununifrac")
+
+plot_ordination(ulcers_rare, ord.ununifrac, color="Spaceflight")
+
+set.seed(123)
+adonis2(dm_ununifrac ~ `Spaceflight`, data=samp_dat_wdiv) # p-value = 0.034
+
+ununi_spaceflight <- plot_ordination(ulcers_rare, ord.ununifrac, color = "Spaceflight") +
+  scale_color_manual(values = c("blue", "red")) +
+  stat_ellipse(type = "norm") +
+  ggtitle("UniFrac for Diabetic Foot Ulcers Microbiome Samples\nAcross Space and Ground Control Samples")
+
+ununi_spaceflight
+
+ggsave("unweighted_unifrac_permanova_final.png", plot = ununi_spaceflight, width = 6, height = 4, dpi = 300)
 ```
