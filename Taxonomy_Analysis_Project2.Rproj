@@ -1,0 +1,16 @@
+Version: 1.0
+ProjectId: 0e2213e0-d0b3-4938-939a-6f5bf727178d
+
+RestoreWorkspace: Default
+SaveWorkspace: Default
+AlwaysSaveHistory: Default
+
+EnableCodeIndexing: Yes
+UseSpacesForTab: Yes
+NumSpacesForTab: 2
+Encoding: UTF-8
+
+RnwWeave: Sweave
+LaTeX: pdfLaTeX
+
+ProjectName: Taxonomy_Analysis_Project2
