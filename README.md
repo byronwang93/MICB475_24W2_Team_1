@@ -22,7 +22,7 @@ This repository stores all the files generated for Project 2.
 ## Project files
 
 ### Lab notebook
-Some analyses performed for this project were excluded from the final manuscript but documented in [Module notes](https://github.com/byronwang93/MICB475_24W2_Team_1/tree/033d03ec6d52063dc493b75f774a9fbe1249ef50/Module_notes)
+The [Module notes](https://github.com/byronwang93/MICB475_24W2_Team_1/tree/033d03ec6d52063dc493b75f774a9fbe1249ef50/Module_notes) folder contains draft notes and documentation of additional work performed for the project.
 
 ### Finalized code
 [Data processing](/00_DataProcessing/)  
