@@ -1,3 +1,5 @@
+Note: Ended up scrapping core microbiome and indicator species analysis due to insufficient results
+
 # Creating phyloseq object and filter dataset to exclude samples where Spaceflight is Not Applicable
 ```
 library(phyloseq)
