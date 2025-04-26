@@ -22,7 +22,7 @@ This repository stores all the files generated for Project 2.
 ## Project files
 
 ### Lab notebook
-add more info here
+Some analyses performed for this project were excluded from the final manuscript but documented in [Lab notebook](/Module notes/)
 
 ### Finalized code
 [Data processing](/00_DataProcessing/)  
